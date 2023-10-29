@@ -14,8 +14,8 @@ class TmdbSpider(scrapy.Spider):
         Once there, parse_full_credits() should be called, by specifying this method in the callback argument to a yielded scrapy.Request. Parse() does not return data
         No more than 5 lines of code
         '''
-        
-        yield scrapy.Request('https://www.themoviedb.org/movie/545611-everything-everywhere-all-at-once/cast', callback = self.parse_full_credits)
+        url = 'https://www.themoviedb.org/movie/545611-everything-everywhere-all-at-once/cast'
+        yield scrapy.Request(url, callback = self.parse_full_credits)
 
     def parse_full_credits(self, response):
         '''
@@ -25,6 +25,7 @@ class TmdbSpider(scrapy.Spider):
         '''
 
         actors = response.css('ol.people.credits:not(.crew) a::attr(href)').getall()
+        print(actors)
         for actor in actors:
             yield response.follow(actor, callback = self.parse_actor_page)
     
@@ -35,9 +36,10 @@ class TmdbSpider(scrapy.Spider):
         Note: need to determine both name of the actor and the name of the movie or show. no morethan 15 lines
         '''
         actor_name = response.css("h2 a::text").get() #get actor name by getting the a tags 
+        print(actor_name)
         # iterate through all movies in actor's credit list and make a dictionary for each credit.
-        for movie_or_TV_name in response.css("div.credist_list bdi::text").getall():
-            yield{
+        for movie_or_TV_name in response.css("div.credits_list bdi::text").getall():
+            yield {
                 "actor": actor_name,
                 "movie_or_TV_name": movie_or_TV_name
             }
